@@ -97,6 +97,11 @@ func Routers() *gin.Engine {
 	{
 		robotRouter := router.RouterGroupApp.Robot
 		robotRouter.InitRobUserRouter(PrivateGroup)
+		robotRouter.InitRobAdminLogRouter(PrivateGroup)
+		robotRouter.InitRobCronLogRouter(PrivateGroup)
+		robotRouter.InitRobExchangeRouter(PrivateGroup)
+		robotRouter.InitRobExchangeSymboRouter(PrivateGroup)
+		robotRouter.InitRobPairRouter(PrivateGroup)
 	}
 
 	global.GVA_LOG.Info("router register success")

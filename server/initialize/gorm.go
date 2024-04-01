@@ -53,7 +53,7 @@ func RegisterTables() {
 		example.ExaCustomer{},
 		example.ExaFileChunk{},
 		example.ExaFileUploadAndDownload{},
-		robot.RobUser{},
+		robot.RobUser{}, robot.RobAdminLog{}, robot.RobCronLog{}, robot.RobExchange{}, robot.RobExchangeSymbo{}, robot.RobPair{},
 	)
 	if err != nil {
 		global.GVA_LOG.Error("register table failed", zap.Error(err))
