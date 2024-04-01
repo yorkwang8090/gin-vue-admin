@@ -50,22 +50,22 @@ cors:
           expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type
           allow-credentials: true
 db-list:
-    - type: "mysql"
-      alias-name: "mysql8"
+    - type: mysql
+      alias-name: mysql8
       prefix: ""
       port: "30005"
       config: ""
-      db-name: "star_chain_plan"
-      username: "root"
-      password: "YWqXCwheQt9wZu2QqFAw"
-      path: "119.91.235.52"
+      db-name: star_chain_plan
+      username: root
+      password: YWqXCwheQt9wZu2QqFAw
+      path: 119.91.235.52
       engine: ""
       log-mode: ""
       max-idle-conns: 10
       max-open-conns: 100
       singular: false
       log-zap: false
-      disable: false     
+      disable: false
 email:
     to: xxx@qq.com
     from: xxx@163.com
@@ -194,7 +194,7 @@ system:
     addr: 8888
     iplimit-count: 15000
     iplimit-time: 3600
-    use-multipoint: false
+    use-multipoint: true
     use-redis: true
     use-mongo: false
 tencent-cos:
