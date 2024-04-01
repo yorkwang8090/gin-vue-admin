@@ -35,6 +35,7 @@ func (fs justFilesFilesystem) Open(name string) (http.File, error) {
 
 func Routers() *gin.Engine {
 	Router := gin.New()
+	//设置路由日志输出框架
 	Router.Use(middleware.ZapLogger(), gin.Recovery())
 	if gin.Mode() == gin.DebugMode {
 		Router.Use(gin.Logger())
