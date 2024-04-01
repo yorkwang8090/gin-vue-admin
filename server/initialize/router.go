@@ -1,6 +1,9 @@
 package initialize
 
 import (
+	"net/http"
+	"os"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/docs"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/middleware"
@@ -8,8 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"net/http"
-	"os"
 )
 
 type justFilesFilesystem struct {
@@ -34,7 +35,7 @@ func (fs justFilesFilesystem) Open(name string) (http.File, error) {
 
 func Routers() *gin.Engine {
 	Router := gin.New()
-	Router.Use(gin.Recovery())
+	Router.Use(middleware.ZapLogger(), gin.Recovery())
 	if gin.Mode() == gin.DebugMode {
 		Router.Use(gin.Logger())
 	}
