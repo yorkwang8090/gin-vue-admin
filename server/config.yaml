@@ -170,9 +170,15 @@ qiniu:
     use-https: false
     use-cdn-domains: false
 redis:
+    #是否使用redis集群模式
+    useCluster: false
     addr: 192.168.168.65:63791
     password: "1357924680"
     db: 0
+    clusterAddrs:
+        - "172.21.0.3:7000"
+        - "172.21.0.4:7001"
+        - "172.21.0.2:7002"
 sqlite:
     prefix: ""
     port: ""
