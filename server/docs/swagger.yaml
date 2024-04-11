@@ -150,6 +150,9 @@ definitions:
     type: object
   config.Mongo:
     properties:
+      auth-source:
+        description: 验证数据库
+        type: string
       coll:
         description: collection name
         type: string
@@ -384,12 +387,20 @@ definitions:
       addr:
         description: 服务器地址:端口
         type: string
+      clusterAddrs:
+        description: 集群模式下的节点地址列表
+        items:
+          type: string
+        type: array
       db:
-        description: redis的哪个数据库
+        description: 单实例模式下redis的哪个数据库
         type: integer
       password:
         description: 密码
         type: string
+      useCluster:
+        description: 是否使用集群模式
+        type: boolean
     type: object
   config.Server:
     properties:
@@ -542,9 +553,6 @@ definitions:
       db-type:
         description: 数据库类型:mysql(默认)|sqlite|sqlserver|postgresql
         type: string
-      env:
-        description: 环境值
-        type: string
       iplimit-count:
         type: integer
       iplimit-time:
@@ -555,7 +563,7 @@ definitions:
       router-prefix:
         type: string
       use-mongo:
-        description: 使用redis
+        description: 使用mongo
         type: boolean
       use-multipoint:
         description: 多点登录拦截
@@ -1096,6 +1104,170 @@ definitions:
       user:
         $ref: '#/definitions/system.SysUser'
     type: object
+  robot.RobAdminLog:
+    properties:
+      content:
+        description: 操作说明
+        type: string
+      id:
+        description: id字段
+        type: integer
+      operPath:
+        description: 操作pathname
+        type: string
+      operPost:
+        description: 提交数据
+        type: string
+      operTime:
+        description: 操作时间
+        type: integer
+      userIp:
+        description: 操作ip
+        type: string
+      userName:
+        description: 操作人
+        type: string
+    type: object
+  robot.RobCronLog:
+    properties:
+      addtime:
+        description: addtime字段
+        type: integer
+      content:
+        description: 内容
+        type: string
+      exid:
+        description: 交易所
+        type: integer
+      id:
+        description: id字段
+        type: integer
+      pid:
+        description: 交易对
+        type: integer
+      symbol:
+        description: 交易对
+        type: string
+      type:
+        description: 类型 对敲  趋势  跟随
+        type: string
+      uid:
+        description: 所属用户
+        type: integer
+    type: object
+  robot.RobExchange:
+    properties:
+      addtime:
+        description: 添加时间
+        type: integer
+      apiUrl:
+        description: api接口地址
+        type: string
+      extend:
+        description: 扩展参数，如comexvip的uid：156
+        type: string
+      id:
+        description: id字段
+        type: integer
+      isfollow:
+        description: 是否为跟随交易所
+        type: boolean
+      status:
+        description: 状态
+        type: boolean
+      title:
+        description: 交易所名称
+        type: string
+    type: object
+  robot.RobExchangeSymbo:
+    properties:
+      exchangeId:
+        description: 交易所id
+        type: integer
+      id:
+        description: id
+        type: integer
+      sort:
+        description: 排序
+        type: integer
+      symbol:
+        description: 币种编码
+        type: string
+    type: object
+  robot.RobPair:
+    properties:
+      addtime:
+        description: 添加时间
+        type: integer
+      ak:
+        description: ak字段
+        type: string
+      beat:
+        description: 对敲
+        type: string
+      exid:
+        description: 所属交易所
+        type: integer
+      follow:
+        description: 跟随
+        type: string
+      id:
+        description: id字段
+        type: integer
+      pankou:
+        description: 盘口自动挂单撤单设置
+        type: string
+      pricePrecision:
+        description: 价格小数位数
+        type: integer
+      sk:
+        description: sk字段
+        type: string
+      status:
+        description: status字段
+        type: boolean
+      symbol:
+        description: 交易对   BTC_USDT
+        type: string
+      trend:
+        description: 趋势
+        type: string
+      uid:
+        description: 所属用户
+        type: integer
+      volumePrecision:
+        description: 数量小数位数
+        type: integer
+    type: object
+  robot.RobUser:
+    properties:
+      addtime:
+        description: 添加时间
+        type: integer
+      exptime:
+        description: exptime字段
+        type: integer
+      id:
+        description: 主键
+        type: integer
+      mobile:
+        description: 通知邮件
+        type: string
+      status:
+        description: status字段
+        type: boolean
+      userName:
+        description: 登陆账号
+        type: string
+      userNickName:
+        description: 英文昵称
+        type: string
+      userPwd:
+        description: 登陆密码
+        type: string
+    required:
+    - id
+    type: object
   system.AutoCodeStruct:
     properties:
       abbreviation:
@@ -1103,6 +1275,9 @@ definitions:
         type: string
       autoCreateApiToSql:
         description: 是否自动创建api
+        type: boolean
+      autoCreateMenuToSql:
+        description: 是否自动创建menu
         type: boolean
       autoCreateResource:
         description: 是否自动创建资源标识
@@ -1120,7 +1295,8 @@ definitions:
         items:
           $ref: '#/definitions/system.Field'
         type: array
-      hasTimer:
+      gvaModel:
+        description: 是否使用gva默认Model
         type: boolean
       humpPackageName:
         description: go文件名称
@@ -1130,11 +1306,33 @@ definitions:
       packageName:
         description: 文件名称
         type: string
+      primaryField:
+        $ref: '#/definitions/system.Field'
       structName:
         description: Struct名称
         type: string
       tableName:
         description: 表名
+        type: string
+    type: object
+  system.Condition:
+    properties:
+      ID:
+        description: 主键ID
+        type: integer
+      column:
+        type: string
+      createdAt:
+        description: 创建时间
+        type: string
+      from:
+        type: string
+      operator:
+        type: string
+      templateID:
+        type: string
+      updatedAt:
+        description: 更新时间
         type: string
     type: object
   system.Field:
@@ -1172,6 +1370,9 @@ definitions:
       fieldType:
         description: Field数据类型
         type: string
+      primaryKey:
+        description: 是否主键
+        type: boolean
       require:
         description: 是否必填
         type: boolean
@@ -1423,7 +1624,42 @@ definitions:
         type: string
       value:
         description: 字典值
+        type: string
+    type: object
+  system.SysExportTemplate:
+    properties:
+      ID:
+        description: 主键ID
         type: integer
+      conditions:
+        items:
+          $ref: '#/definitions/system.Condition'
+        type: array
+      createdAt:
+        description: 创建时间
+        type: string
+      dbName:
+        description: 数据库名称
+        type: string
+      limit:
+        type: integer
+      name:
+        description: 模板名称
+        type: string
+      order:
+        type: string
+      tableName:
+        description: 表名称
+        type: string
+      templateID:
+        description: 模板标识
+        type: string
+      templateInfo:
+        description: 模板信息
+        type: string
+      updatedAt:
+        description: 更新时间
+        type: string
     type: object
   system.SysMenu:
     properties:
@@ -3279,6 +3515,985 @@ paths:
       summary: 更新菜单
       tags:
       - Menu
+  /robAdminLog/createRobAdminLog:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 创建robAdminLog表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobAdminLog'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"创建成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 创建robAdminLog表
+      tags:
+      - RobAdminLog
+  /robAdminLog/deleteRobAdminLog:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 删除robAdminLog表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobAdminLog'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"删除成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 删除robAdminLog表
+      tags:
+      - RobAdminLog
+  /robAdminLog/deleteRobAdminLogByIds:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"批量删除成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 批量删除robAdminLog表
+      tags:
+      - RobAdminLog
+  /robAdminLog/findRobAdminLog:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 操作说明
+        in: query
+        name: content
+        type: string
+      - description: id字段
+        in: query
+        name: id
+        type: integer
+      - description: 操作pathname
+        in: query
+        name: operPath
+        type: string
+      - description: 提交数据
+        in: query
+        name: operPost
+        type: string
+      - description: 操作时间
+        in: query
+        name: operTime
+        type: integer
+      - description: 操作ip
+        in: query
+        name: userIp
+        type: string
+      - description: 操作人
+        in: query
+        name: userName
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"查询成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 用id查询robAdminLog表
+      tags:
+      - RobAdminLog
+  /robAdminLog/getRobAdminLogList:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 关键字
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 分页获取robAdminLog表列表
+      tags:
+      - RobAdminLog
+  /robAdminLog/updateRobAdminLog:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 更新robAdminLog表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobAdminLog'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"更新成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 更新robAdminLog表
+      tags:
+      - RobAdminLog
+  /robCronLog/createRobCronLog:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 创建robCronLog表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobCronLog'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"创建成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 创建robCronLog表
+      tags:
+      - RobCronLog
+  /robCronLog/deleteRobCronLog:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 删除robCronLog表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobCronLog'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"删除成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 删除robCronLog表
+      tags:
+      - RobCronLog
+  /robCronLog/deleteRobCronLogByIds:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"批量删除成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 批量删除robCronLog表
+      tags:
+      - RobCronLog
+  /robCronLog/findRobCronLog:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: addtime字段
+        in: query
+        name: addtime
+        type: integer
+      - description: 内容
+        in: query
+        name: content
+        type: string
+      - description: 交易所
+        in: query
+        name: exid
+        type: integer
+      - description: id字段
+        in: query
+        name: id
+        type: integer
+      - description: 交易对
+        in: query
+        name: pid
+        type: integer
+      - description: 交易对
+        in: query
+        name: symbol
+        type: string
+      - description: 类型 对敲  趋势  跟随
+        in: query
+        name: type
+        type: string
+      - description: 所属用户
+        in: query
+        name: uid
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"查询成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 用id查询robCronLog表
+      tags:
+      - RobCronLog
+  /robCronLog/getRobCronLogList:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 关键字
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 分页获取robCronLog表列表
+      tags:
+      - RobCronLog
+  /robCronLog/updateRobCronLog:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 更新robCronLog表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobCronLog'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"更新成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 更新robCronLog表
+      tags:
+      - RobCronLog
+  /robExchange/createRobExchange:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 创建robExchange表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobExchange'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"创建成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 创建robExchange表
+      tags:
+      - RobExchange
+  /robExchange/deleteRobExchange:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 删除robExchange表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobExchange'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"删除成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 删除robExchange表
+      tags:
+      - RobExchange
+  /robExchange/deleteRobExchangeByIds:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"批量删除成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 批量删除robExchange表
+      tags:
+      - RobExchange
+  /robExchange/findRobExchange:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 添加时间
+        in: query
+        name: addtime
+        type: integer
+      - description: api接口地址
+        in: query
+        name: apiUrl
+        type: string
+      - description: 扩展参数，如comexvip的uid：156
+        in: query
+        name: extend
+        type: string
+      - description: id字段
+        in: query
+        name: id
+        type: integer
+      - description: 是否为跟随交易所
+        in: query
+        name: isfollow
+        type: boolean
+      - description: 状态
+        in: query
+        name: status
+        type: boolean
+      - description: 交易所名称
+        in: query
+        name: title
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"查询成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 用id查询robExchange表
+      tags:
+      - RobExchange
+  /robExchange/getRobExchangeList:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 关键字
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 分页获取robExchange表列表
+      tags:
+      - RobExchange
+  /robExchange/updateRobExchange:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 更新robExchange表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobExchange'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"更新成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 更新robExchange表
+      tags:
+      - RobExchange
+  /robExchangeSymbo/createRobExchangeSymbo:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 创建robExchangeSymbo表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobExchangeSymbo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"创建成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 创建robExchangeSymbo表
+      tags:
+      - RobExchangeSymbo
+  /robExchangeSymbo/deleteRobExchangeSymbo:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 删除robExchangeSymbo表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobExchangeSymbo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"删除成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 删除robExchangeSymbo表
+      tags:
+      - RobExchangeSymbo
+  /robExchangeSymbo/deleteRobExchangeSymboByIds:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"批量删除成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 批量删除robExchangeSymbo表
+      tags:
+      - RobExchangeSymbo
+  /robExchangeSymbo/findRobExchangeSymbo:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 交易所id
+        in: query
+        name: exchangeId
+        type: integer
+      - description: id
+        in: query
+        name: id
+        type: integer
+      - description: 排序
+        in: query
+        name: sort
+        type: integer
+      - description: 币种编码
+        in: query
+        name: symbol
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"查询成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 用id查询robExchangeSymbo表
+      tags:
+      - RobExchangeSymbo
+  /robExchangeSymbo/getRobExchangeSymboList:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 关键字
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 分页获取robExchangeSymbo表列表
+      tags:
+      - RobExchangeSymbo
+  /robExchangeSymbo/updateRobExchangeSymbo:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 更新robExchangeSymbo表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobExchangeSymbo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"更新成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 更新robExchangeSymbo表
+      tags:
+      - RobExchangeSymbo
+  /robPair/createRobPair:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 创建robPair表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobPair'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"创建成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 创建robPair表
+      tags:
+      - RobPair
+  /robPair/deleteRobPair:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 删除robPair表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobPair'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"删除成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 删除robPair表
+      tags:
+      - RobPair
+  /robPair/deleteRobPairByIds:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"批量删除成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 批量删除robPair表
+      tags:
+      - RobPair
+  /robPair/findRobPair:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 添加时间
+        in: query
+        name: addtime
+        type: integer
+      - description: ak字段
+        in: query
+        name: ak
+        type: string
+      - description: 对敲
+        in: query
+        name: beat
+        type: string
+      - description: 所属交易所
+        in: query
+        name: exid
+        type: integer
+      - description: 跟随
+        in: query
+        name: follow
+        type: string
+      - description: id字段
+        in: query
+        name: id
+        type: integer
+      - description: 盘口自动挂单撤单设置
+        in: query
+        name: pankou
+        type: string
+      - description: 价格小数位数
+        in: query
+        name: pricePrecision
+        type: integer
+      - description: sk字段
+        in: query
+        name: sk
+        type: string
+      - description: status字段
+        in: query
+        name: status
+        type: boolean
+      - description: 交易对   BTC_USDT
+        in: query
+        name: symbol
+        type: string
+      - description: 趋势
+        in: query
+        name: trend
+        type: string
+      - description: 所属用户
+        in: query
+        name: uid
+        type: integer
+      - description: 数量小数位数
+        in: query
+        name: volumePrecision
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"查询成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 用id查询robPair表
+      tags:
+      - RobPair
+  /robPair/getRobPairList:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 关键字
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 分页获取robPair表列表
+      tags:
+      - RobPair
+  /robPair/updateRobPair:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 更新robPair表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobPair'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"更新成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 更新robPair表
+      tags:
+      - RobPair
+  /robuser/createRobUser:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 创建user表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"创建成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 创建user表
+      tags:
+      - RobUser
+  /robuser/deleteRobUser:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 删除user表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"删除成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 删除user表
+      tags:
+      - RobUser
+  /robuser/deleteRobUserByIds:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"批量删除成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 批量删除user表
+      tags:
+      - RobUser
+  /robuser/findRobUser:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 添加时间
+        in: query
+        name: addtime
+        type: integer
+      - description: exptime字段
+        in: query
+        name: exptime
+        type: integer
+      - description: 主键
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: 通知邮件
+        in: query
+        name: mobile
+        type: string
+      - description: status字段
+        in: query
+        name: status
+        type: boolean
+      - description: 登陆账号
+        in: query
+        name: userName
+        type: string
+      - description: 英文昵称
+        in: query
+        name: userNickName
+        type: string
+      - description: 登陆密码
+        in: query
+        name: userPwd
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"查询成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 用id查询user表
+      tags:
+      - RobUser
+  /robuser/getRobUserList:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 关键字
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 分页获取user表列表
+      tags:
+      - RobUser
+  /robuser/updateRobUser:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 更新user表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/robot.RobUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"更新成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 更新user表
+      tags:
+      - RobUser
   /sysDictionary/createSysDictionary:
     post:
       consumes:
@@ -3535,7 +4750,7 @@ paths:
       - description: 字典值
         in: query
         name: value
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -3608,7 +4823,7 @@ paths:
       - description: 字典值
         in: query
         name: value
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -3656,6 +4871,250 @@ paths:
       summary: 更新SysDictionaryDetail
       tags:
       - SysDictionaryDetail
+  /sysExportTemplate/createSysExportTemplate:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 创建导出模板
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/system.SysExportTemplate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"创建成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 创建导出模板
+      tags:
+      - SysExportTemplate
+  /sysExportTemplate/deleteSysExportTemplate:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 删除导出模板
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/system.SysExportTemplate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"删除成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 删除导出模板
+      tags:
+      - SysExportTemplate
+  /sysExportTemplate/deleteSysExportTemplateByIds:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 批量删除导出模板
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.IdsReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"批量删除成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 批量删除导出模板
+      tags:
+      - SysExportTemplate
+  /sysExportTemplate/exportExcel:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: 导出表格模板
+      tags:
+      - SysExportTemplate
+  /sysExportTemplate/findSysExportTemplate:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 主键ID
+        in: query
+        name: ID
+        type: integer
+      - description: 创建时间
+        in: query
+        name: createdAt
+        type: string
+      - description: 数据库名称
+        in: query
+        name: dbName
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - description: 模板名称
+        in: query
+        name: name
+        type: string
+      - in: query
+        name: order
+        type: string
+      - description: 表名称
+        in: query
+        name: tableName
+        type: string
+      - description: 模板标识
+        in: query
+        name: templateID
+        type: string
+      - description: 模板信息
+        in: query
+        name: templateInfo
+        type: string
+      - description: 更新时间
+        in: query
+        name: updatedAt
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"查询成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 用id查询导出模板
+      tags:
+      - SysExportTemplate
+  /sysExportTemplate/getSysExportTemplateList:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 主键ID
+        in: query
+        name: ID
+        type: integer
+      - description: 创建时间
+        in: query
+        name: createdAt
+        type: string
+      - description: 数据库名称
+        in: query
+        name: dbName
+        type: string
+      - in: query
+        name: endCreatedAt
+        type: string
+      - description: 关键字
+        in: query
+        name: keyword
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - description: 模板名称
+        in: query
+        name: name
+        type: string
+      - in: query
+        name: order
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: startCreatedAt
+        type: string
+      - description: 表名称
+        in: query
+        name: tableName
+        type: string
+      - description: 模板标识
+        in: query
+        name: templateID
+        type: string
+      - description: 模板信息
+        in: query
+        name: templateInfo
+        type: string
+      - description: 更新时间
+        in: query
+        name: updatedAt
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 分页获取导出模板列表
+      tags:
+      - SysExportTemplate
+  /sysExportTemplate/importExcel:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: 导入表格
+      tags:
+      - SysImportTemplate
+  /sysExportTemplate/updateSysExportTemplate:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 更新导出模板
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/system.SysExportTemplate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"更新成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 更新导出模板
+      tags:
+      - SysExportTemplate
   /sysOperationRecord/createSysOperationRecord:
     post:
       consumes:
