@@ -16,4 +16,5 @@ var (
 	OldAuthorityVerify     = Rules{"OldAuthorityId": {NotEmpty()}}
 	ChangePasswordVerify   = Rules{"Password": {NotEmpty()}, "NewPassword": {NotEmpty()}}
 	SetUserAuthorityVerify = Rules{"AuthorityId": {NotEmpty()}}
+	RobUserVerify          = Rules{"UserName": {NotEmpty()}, "UserNickName": {NotEmpty()}, "UserPwd": {NotEmpty()}, "Mobile": {NotEmpty()}, "Exptime": {NotEmpty(), Ge("1")}}
 )

@@ -1,11 +1,14 @@
 package robot
 
 import (
+	"time"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/robot"
 	robotReq "github.com/flipped-aurora/gin-vue-admin/server/model/robot/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/service"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -31,6 +34,14 @@ func (robuserApi *RobUserApi) CreateRobUser(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+	err = utils.Verify(robuser, utils.RobUserVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	//获取当前时间戳单位秒
+	temp := int(time.Now().Unix())
+	robuser.Addtime = &temp
 
 	if err := robuserService.CreateRobUser(&robuser); err != nil {
 		global.GVA_LOG.Error("创建失败!", zap.Error(err))
