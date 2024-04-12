@@ -40,7 +40,7 @@ func (robuserApi *RobUserApi) CreateRobUser(c *gin.Context) {
 		return
 	}
 	//获取当前时间戳单位秒
-	temp := int(time.Now().Unix())
+	temp := uint(time.Now().Unix())
 	robuser.Addtime = &temp
 
 	if err := robuserService.CreateRobUser(&robuser); err != nil {
