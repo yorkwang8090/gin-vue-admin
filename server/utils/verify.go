@@ -17,4 +17,5 @@ var (
 	ChangePasswordVerify   = Rules{"Password": {NotEmpty()}, "NewPassword": {NotEmpty()}}
 	SetUserAuthorityVerify = Rules{"AuthorityId": {NotEmpty()}}
 	RobUserVerify          = Rules{"UserName": {NotEmpty()}, "UserNickName": {NotEmpty()}, "UserPwd": {NotEmpty()}, "Mobile": {NotEmpty()}, "Exptime": {NotEmpty()}}
+	UserLoginVerify        = Rules{"VerityId": {NotEmpty()}, "Username": {NotEmpty()}, "Password": {NotEmpty()}}
 )

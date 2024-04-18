@@ -9,6 +9,7 @@ import (
 	robotReq "github.com/flipped-aurora/gin-vue-admin/server/model/robot/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/service"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils/captcha"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -17,6 +18,8 @@ type RobUserApi struct {
 }
 
 var robuserService = service.ServiceGroupApp.RobotServiceGroup.RobUserService
+
+var store = captcha.NewDefaultRedisStore()
 
 // CreateRobUser 创建user表
 // @Tags RobUser
@@ -159,4 +162,45 @@ func (robuserApi *RobUserApi) GetRobUserList(c *gin.Context) {
 			PageSize: pageInfo.PageSize,
 		}, "获取成功", c)
 	}
+}
+
+// login rob登录
+// @Tags RobUser
+// @Summary 登录
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query robot.RobUser true "登录"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"登录成功"}"
+// @Router /robuser/login [post]
+func (robuserApi *RobUserApi) Login(c *gin.Context) {
+	var loginReq robotReq.UserLogin
+	err := c.ShouldBindJSON(&loginReq)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = utils.Verify(loginReq, utils.UserLoginVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if loginReq.VerityId != "" && loginReq.Verity != "" && store.Verify(loginReq.VerityId, loginReq.Verity, true) {
+		u := &robot.RobUser{UserName: loginReq.UserName, UserPwd: loginReq.Password}
+		robuser, err := robuserService.Login(u)
+		if err != nil {
+			global.GVA_LOG.Error("登录失败! 用户名不存在或者密码错误", zap.Error(err))
+			response.FailWithMessage("用户名不存在或者密码错误", c)
+			return
+		}
+		if robuser.Status != nil && !*robuser.Status {
+			global.GVA_LOG.Error("登陆失败! 用户被禁止登录!")
+			response.FailWithMessage("用户被禁止登录", c)
+			return
+		}
+		// 生成token，并存入redis
+		//token, err := utils.SetRedisJWT(*robuser)
+		return
+	}
+	response.FailWithMessage("验证码错误", c)
 }

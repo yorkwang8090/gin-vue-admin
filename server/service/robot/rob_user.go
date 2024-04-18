@@ -1,12 +1,32 @@
 package robot
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/robot"
 	robotReq "github.com/flipped-aurora/gin-vue-admin/server/model/robot/request"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 )
 
 type RobUserService struct {
+}
+
+// Login
+func (robuserService *RobUserService) Login(robuser *robot.RobUser) (userInfor *robot.RobUser, err error) {
+	if nil == global.GVA_DB {
+		return nil, fmt.Errorf("db not init")
+	}
+	var user robot.RobUser
+	err = global.GVA_DB.Where("user_name = ?", robuser.UserName).First(&user).Error
+	if err == nil {
+		//判断密码是否正确
+		if ok := utils.BcryptCheck(robuser.UserPwd, user.UserPwd); !ok {
+			return nil, errors.New("密码错误")
+		}
+	}
+	return &user, err
 }
 
 // CreateRobUser 创建user表记录
